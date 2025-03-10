@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Events, type Client, type CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, Events, MessageFlags, MessageFlagsBitField, type Client, type CommandInteraction } from "discord.js";
 import { Commands } from "../types/Command";
 
 export default (client: Client) => {
@@ -24,7 +24,14 @@ const chatInputCommandHandler = async (interaction: ChatInputCommandInteraction)
     }
 
     try {
-
+        if (command.defer) {
+            if (interaction.ephemeral) {
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+            }
+            else {
+                await interaction.deferReply();
+            }
+        }
         await command.execute(interaction);
     } catch (error) {
         console.error(error);

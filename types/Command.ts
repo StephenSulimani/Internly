@@ -1,12 +1,17 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import type { Client, CommandInteraction } from "discord.js";
-import chalk from 'chalk';
+import type { AutocompleteInteraction, Client, CommandInteraction } from "discord.js";
+import type CommandOption from './CommandOption';
 
 export default interface Command {
     name: string;
     description: string;
+    options: CommandOption[]
+    nsfw?: boolean;
+    ephemeral?: boolean;
+    defer?: boolean;
     execute(interaction: CommandInteraction): Promise<void>;
+    autocomplete?: (interaction: AutocompleteInteraction) => Promise<void>;
 };
 
 export const Commands: Command[] = [];
