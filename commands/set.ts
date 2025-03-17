@@ -59,9 +59,6 @@ const set: Command = {
         let notif_role: Role | null = null;
 
         if (!role && !channel) {
-            // If no arguments are passed, create the role and channel if not set. Otherwise, do nothing.
-
-
             if (db_guild.notification_role_id != "" && db_guild.notification_channel_id != "") {
 
                 try {
@@ -130,17 +127,12 @@ const set: Command = {
                 embed.setError();
                 await interaction.reply({ embeds: [embed.getEmbed()], flags: MessageFlags.Ephemeral });
             }
-
-
-
-            // await interaction.reply({ content: "You need to specify a role or a channel!", ephemeral: true });
         }
-
 
 
         if (role) {
             try {
-                await prisma.guild.update({
+                db_guild = await prisma.guild.update({
                     where: {
                         id: interaction.guildId
                     },
@@ -150,13 +142,15 @@ const set: Command = {
                 });
             }
             catch {
-                await interaction.reply({ content: "There was an error setting the role.", ephemeral: true });
+                const embed = new Embed(interaction.client, "Error", "There was an error setting the role.");
+                embed.setError();
+                await interaction.reply({ embeds: [embed.getEmbed()], flags: MessageFlags.Ephemeral });
             }
         }
 
         if (channel) {
             try {
-                await prisma.guild.update({
+                db_guild = await prisma.guild.update({
                     where: {
                         id: interaction.guildId
                     },
@@ -166,11 +160,14 @@ const set: Command = {
                 });
             }
             catch {
-                await interaction.reply({ content: "There was an error setting the channel.", ephemeral: true });
+                const embed = new Embed(interaction.client, "Error", "There was an error setting the channel.");
+                embed.setError();
+                await interaction.reply({ embeds: [embed.getEmbed()], flags: MessageFlags.Ephemeral });
             }
         }
 
-        await interaction.reply({ content: "hurd", ephemeral: true });
+        const embed = new Embed(interaction.client, "Success", `The notification role (<@&${db_guild.notification_role_id}>) and channel (<#${db_guild.notification_channel_id}>) have been set!`);
+        await interaction.reply({ embeds: [embed.getEmbed()], flags: MessageFlags.Ephemeral });
     },
 };
 
