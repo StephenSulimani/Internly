@@ -1,5 +1,5 @@
 import type Command from "../types/Command";
-import { PermissionFlagsBits, type CommandInteraction } from "discord.js";
+import { ChannelType, MessageFlags, PermissionFlagsBits, Role, type CommandInteraction, type GuildBasedChannel } from "discord.js";
 import { CommandOptionType } from "../types/CommandOption";
 import prisma from "../handlers/prisma";
 
@@ -21,7 +21,7 @@ const set: Command = {
         }
     ],
     async execute(interaction: CommandInteraction) {
-        if (interaction.guildId === null) {
+        if (interaction.guildId === null || interaction.guild === null) {
             await interaction.reply({ content: "This command can only be used in a server!", ephemeral: true });
             return;
         }
@@ -34,12 +34,7 @@ const set: Command = {
         const role = interaction.options.get("role");
         const channel = interaction.options.get("channel");
 
-        if (!role && !channel) {
-            await interaction.reply({ content: "You need to specify a role or a channel!", ephemeral: true });
-            return;
-        }
-
-        const db_guild = await prisma.guild.findFirst({
+        let db_guild = await prisma.guild.findFirst({
             where: {
                 id: {
                     equals: interaction.guildId
@@ -48,12 +43,77 @@ const set: Command = {
         });
 
         if (!db_guild) {
-            await prisma.guild.create({
+            db_guild = await prisma.guild.create({
                 data: {
                     id: interaction.guildId
                 }
             });
         }
+
+        let notif_channel: GuildBasedChannel | null = null;
+        let notif_role: Role | null = null;
+
+        if (!role && !channel) {
+            // If no arguments are passed, create the role and channel if not set. Otherwise, do nothing.
+
+
+            if (db_guild.notification_role_id != "" && db_guild.notification_channel_id != "") {
+
+                notif_channel = await interaction.guild.channels.fetch(db_guild.notification_channel_id);
+                notif_role = await interaction.guild.roles.fetch(db_guild.notification_role_id);
+
+                if (notif_channel && notif_role) {
+                    await interaction.reply({ content: `The notification role (<@&${notif_role.id}>) and channel (<#${notif_channel.id}>) are already set!`, flags: MessageFlags.Ephemeral });
+                    return;
+                }
+            }
+
+
+            try {
+                if (!notif_role) {
+                    notif_role = await interaction.guild.roles.create({
+                        name: "Internly Notification",
+                        reason: "Internly Notification Role"
+                    });
+
+                }
+                if (!notif_channel) {
+                    notif_channel = await interaction.guild.channels.create({
+                        name: "internly",
+                        type: ChannelType.GuildText,
+                        permissionOverwrites: [
+                            {
+                                id: interaction.guildId,
+                                allow: [PermissionFlagsBits.ViewChannel],
+                                deny: [PermissionFlagsBits.SendMessages]
+                            },
+                        ]
+                    });
+
+                }
+
+                await prisma.guild.update({
+                    where: {
+                        id: interaction.guildId
+                    },
+                    data: {
+                        notification_role_id: notif_role.id,
+                        notification_channel_id: notif_channel.id
+                    }
+                });
+                await interaction.reply({ content: `The notification role (<@&${notif_role.id}>) and channel (<#${notif_channel.id}>) have been created!`, flags: MessageFlags.Ephemeral });
+                return;
+
+            }
+            catch {
+                await interaction.reply({ content: "There was an error creating and saving the role and channel.", flags: MessageFlags.Ephemeral });
+            }
+
+
+
+            // await interaction.reply({ content: "You need to specify a role or a channel!", ephemeral: true });
+        }
+
 
 
         if (role) {

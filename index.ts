@@ -1,6 +1,5 @@
 import chalk from "chalk";
-import { Client, Events, GatewayIntentBits, CommandInteraction, MessageFlags } from "discord.js";
-import type Command from "./types/Command";
+import { Client, Events, GatewayIntentBits } from "discord.js";
 import { Commands, registerCommands } from "./types/Command";
 import interactionCreate from "./handlers/interactionCreate";
 
