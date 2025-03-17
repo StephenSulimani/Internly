@@ -2,6 +2,7 @@ import type Command from "../types/Command";
 import { ChannelType, MessageFlags, PermissionFlagsBits, Role, type CommandInteraction, type GuildBasedChannel } from "discord.js";
 import { CommandOptionType } from "../types/CommandOption";
 import prisma from "../handlers/prisma";
+import Embed from "../types/Embed";
 
 const set: Command = {
     name: "set",
@@ -22,12 +23,16 @@ const set: Command = {
     ],
     async execute(interaction: CommandInteraction) {
         if (interaction.guildId === null || interaction.guild === null) {
-            await interaction.reply({ content: "This command can only be used in a server!", ephemeral: true });
+            const embed = new Embed(interaction.client, "Error", "This command can only be used in a server!");
+            embed.setError();
+            await interaction.reply({ embeds: [embed.getEmbed()], ephemeral: true });
             return;
         }
         // Check Permissions of user
         if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-            await interaction.reply({ content: "You need to be an admin to use this command!", ephemeral: true });
+            const embed = new Embed(interaction.client, "Error", "You need to be an admin to use this command!");
+            embed.setError();
+            await interaction.reply({ embeds: [embed.getEmbed()], ephemeral: true });
             return;
 
         }
@@ -59,11 +64,25 @@ const set: Command = {
 
             if (db_guild.notification_role_id != "" && db_guild.notification_channel_id != "") {
 
-                notif_channel = await interaction.guild.channels.fetch(db_guild.notification_channel_id);
-                notif_role = await interaction.guild.roles.fetch(db_guild.notification_role_id);
+                try {
+                    notif_channel = await interaction.guild.channels.fetch(db_guild.notification_channel_id);
+                }
+                catch {
+                    notif_channel = null;
+                }
+
+                try {
+                    notif_role = await interaction.guild.roles.fetch(db_guild.notification_role_id);
+                }
+                catch {
+                    notif_role = null;
+                }
+
 
                 if (notif_channel && notif_role) {
-                    await interaction.reply({ content: `The notification role (<@&${notif_role.id}>) and channel (<#${notif_channel.id}>) are already set!`, flags: MessageFlags.Ephemeral });
+                    const embed = new Embed(interaction.client, "Error", `The notification role (<@&${notif_role.id}>) and channel (<#${notif_channel.id}>) are already set!`);
+                    embed.setError();
+                    await interaction.reply({ embeds: [embed.getEmbed()], flags: MessageFlags.Ephemeral });
                     return;
                 }
             }
@@ -101,12 +120,15 @@ const set: Command = {
                         notification_channel_id: notif_channel.id
                     }
                 });
-                await interaction.reply({ content: `The notification role (<@&${notif_role.id}>) and channel (<#${notif_channel.id}>) have been created!`, flags: MessageFlags.Ephemeral });
+                const embed = new Embed(interaction.client, "Success", `The notification role (<@&${notif_role.id}>) and channel (<#${notif_channel.id}>) have been created!`);
+                await interaction.reply({ embeds: [embed.getEmbed()], flags: MessageFlags.Ephemeral });
                 return;
 
             }
             catch {
-                await interaction.reply({ content: "There was an error creating and saving the role and channel.", flags: MessageFlags.Ephemeral });
+                const embed = new Embed(interaction.client, "Error", "There was an error creating and saving the role and channel.");
+                embed.setError();
+                await interaction.reply({ embeds: [embed.getEmbed()], flags: MessageFlags.Ephemeral });
             }
 
 
