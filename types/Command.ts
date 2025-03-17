@@ -6,7 +6,7 @@ import type CommandOption from './CommandOption';
 export default interface Command {
     name: string;
     description: string;
-    options: CommandOption[]
+    options?: CommandOption[]
     nsfw?: boolean;
     ephemeral?: boolean;
     defer?: boolean;

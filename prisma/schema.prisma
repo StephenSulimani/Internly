@@ -14,9 +14,9 @@ datasource db {
 }
 
 model Guild {
-    id                        String @id @default(uuid())
-    notification_channel_id   String @default("")
-    notification_channel_role String @default("")
+    id                      String @id @default(uuid())
+    notification_channel_id String @default("")
+    notification_role_id    String @default("")
 }
 
 model Internship {

@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Events, MessageFlags, MessageFlagsBitField, type Client, type CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, Events, MessageFlags, type Client, type CommandInteraction } from "discord.js";
 import { Commands } from "../types/Command";
 
 export default (client: Client) => {
