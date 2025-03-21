@@ -20,12 +20,12 @@ model Guild {
 }
 
 model Internship {
-    id          String  @id @default(uuid())
-    url         String
+    id          String   @id @default(uuid())
+    url         String   @unique
     title       String
     company     String
     location    String
-    date_posted String
+    date_posted DateTime
     description String?
     salary      String?
 }

@@ -2,6 +2,37 @@ import chalk from "chalk";
 import { Client, Events, GatewayIntentBits } from "discord.js";
 import { Commands, registerCommands } from "./types/Command";
 import interactionCreate from "./handlers/interactionCreate";
+import type Crawler from "./types/Crawler";
+import * as fs from 'fs';
+import * as path from 'path';
+
+
+const loadCrawlers = async (): Promise<Crawler[]> => {
+    const crawlers = [];
+    const crawlersPath = path.join(__dirname, '/crawlers');
+    const crawlerFiles = fs.readdirSync(crawlersPath).filter(file => file.endsWith('.ts'));
+    for (const file of crawlerFiles) {
+        const filePath = path.join(crawlersPath, file);
+        const crawler: Crawler = (await import(filePath)).default;
+        crawlers.push(crawler);
+    }
+    return crawlers;
+};
+
+
+const executeCrawlers = async () => {
+    const crawlers = await loadCrawlers();
+    console.log(chalk.green(`[+] Loaded ${crawlers.length} crawlers`));
+    // Change this to setInterval
+    setTimeout(async () => {
+        for (const crawler of crawlers) {
+            const internships = await crawler.scrape();
+            for (const internship of internships) {
+                console.log(`[${crawler.name}] ${internship.title} - ${internship.location} - ${internship.salary} - ${internship.company}`);
+            }
+        }
+    }, 5 * 1000);
+};
 
 const client = new Client({
     intents: [
@@ -17,5 +48,6 @@ client.once(Events.ClientReady, async (user) => {
 });
 
 interactionCreate(client);
+executeCrawlers();
 
 client.login(process.env.BOT_TOKEN);
