@@ -78,7 +78,7 @@ const arunike: Crawler = {
                         company: match[1] === "↳" ? prev : match[1],
                         title: match[2],
                         salary: match[3],
-                        location: match[4],
+                        location: removeHtmlTags(match[4]),
                         url: url[1],
                         date_posted: new Date(match[6])
                     }
@@ -94,5 +94,13 @@ const arunike: Crawler = {
         return internships;
     }
 };
+
+function removeHtmlTags(input: string): string {
+    const strippedString = input.replace(/<[^>]*>/g, ' ');
+
+    const result = strippedString.replace(/\s+/g, ' ').trim();
+
+    return result;
+}
 
 export default arunike;
