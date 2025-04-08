@@ -7,6 +7,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 
+
+
 const loadCrawlers = async (): Promise<Crawler[]> => {
     const crawlers = [];
     const crawlersPath = path.join(__dirname, '/crawlers');
@@ -44,6 +46,9 @@ client.once(Events.ClientReady, async (user) => {
     await registerCommands(client);
     console.log(chalk.green(`[+] Registered ${Commands.length} commands`));
 });
+
+
+
 
 interactionCreate(client);
 executeCrawlers();
