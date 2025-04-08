@@ -43,6 +43,7 @@ members of KTP, while the crawler will be used to pull the internship listings f
 
 | Feature | Description | Date Completed |
 | --- | --- | --- |
+| Bot Skeleton | Framework for adding commands and handlers to the Discord bot | 03-10-2025
 
 ### Installation
 
