@@ -78,7 +78,7 @@ const arunike: Crawler = {
                         company: match[1] === "↳" ? prev : match[1],
                         title: match[2],
                         salary: match[3],
-                        location: removeHtmlTags(match[4]),
+                        location: parseLocations(match[4]),
                         url: url[1],
                         date_posted: new Date(match[6])
                     }
@@ -95,12 +95,24 @@ const arunike: Crawler = {
     }
 };
 
-function removeHtmlTags(input: string): string {
-    const strippedString = input.replace(/<[^>]*>/g, ' ');
+function parseLocations(input: string): string {
+    if (!input.includes('<') || !input.includes('>')) {
+        return input;
+    }
+    let strippedString = input.replace(/<[^>]*>/g, '|');
 
-    const result = strippedString.replace(/\s+/g, ' ').trim();
 
-    return result;
+    strippedString = strippedString.replace(/(?:\|)+/g, '|')
+
+    const cutString = strippedString.split('|');
+
+    cutString.shift();
+    cutString.shift();
+
+    const result = cutString.join(' | ').trim();
+
+    // Remove last three chars from results
+    return result.slice(0, -3);
 }
 
 export default arunike;
