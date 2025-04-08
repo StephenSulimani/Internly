@@ -24,12 +24,10 @@ const executeCrawlers = async () => {
     const crawlers = await loadCrawlers();
     console.log(chalk.green(`[+] Loaded ${crawlers.length} crawlers`));
     // Change this to setInterval
-    setTimeout(async () => {
+    setInterval(async () => {
         for (const crawler of crawlers) {
             const internships = await crawler.scrape();
-            for (const internship of internships) {
-                console.log(`[${crawler.name}] ${internship.title} - ${internship.location} - ${internship.salary} - ${internship.company}`);
-            }
+            console.log(chalk.green(`[${crawler.name}] Scraped ${internships.length} internship(s)!`));
         }
     }, 5 * 1000);
 };
